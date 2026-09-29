@@ -18,3 +18,6 @@ Copiar `.env.example` a `.env.local` y configurar:
 
 ## Seguridad
 No usar `service_role` ni claves secretas en el navegador. Todas las tablas públicas del proyecto deben tener RLS.
+
+## Despliegue
+Proyecto conectado a Vercel mediante GitHub. Los cambios enviados a `main` deben activar un nuevo deployment automáticamente.
