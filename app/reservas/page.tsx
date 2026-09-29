@@ -1,9 +1,17 @@
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 
 export default async function ReservasPage() {
   const supabase = await createClient()
   const { data: blocked } = await supabase.from('salon_blocked_dates').select('blocked_date, reason').eq('active', true).order('blocked_date')
-  const { data: reservations } = await supabase.from('salon_reservations').select('event_date,status').in('status', ['APPROVED','DELIVERED','RETURN_PENDING'])
+  const { data: reservations } = await supabase.from('salon_reservations').select('event_date,status').in('status', ['REQUESTED','VALIDATING','PAYMENT_PENDING','PAYMENT_REVIEW','APPROVED','DELIVERED','RETURN_PENDING','RETURNED'])
+  const { data: claimsData } = await supabase.auth.getClaims()
+  const userId = claimsData?.claims?.sub
+  let canRequest = false
+  if (userId) {
+    const { data: profile } = await supabase.from('salon_profiles').select('role,active').eq('id', userId).single()
+    canRequest = profile?.active === true && profile.role === 'RESIDENTE'
+  }
 
   return (
     <main>
@@ -16,11 +24,12 @@ export default async function ReservasPage() {
       </div>
       <div className="card" style={{ marginTop: 20 }}>
         <h2>Fechas no disponibles</h2>
-        <ul>
-          {(reservations ?? []).map((r, i) => <li key={`r-${i}`}>{r.event_date} · Reserva</li>)}
+        {(reservations?.length ?? 0) === 0 && (blocked?.length ?? 0) === 0 ? <p className="muted">No hay fechas bloqueadas registradas.</p> : <ul>
+          {(reservations ?? []).map((r, i) => <li key={`r-${i}`}>{r.event_date} · Reserva en proceso</li>)}
           {(blocked ?? []).map((b, i) => <li key={`b-${i}`}>{b.blocked_date} · {b.reason}</li>)}
-        </ul>
+        </ul>}
       </div>
+      {canRequest && <div className="card" style={{ marginTop: 20 }}><strong>¿Encontraste una fecha disponible?</strong><p><Link href="/reservas/nueva">Solicitar reserva del salón →</Link></p></div>}
     </main>
   )
 }
