@@ -15,18 +15,19 @@ async function validarPazSalvo(formData: FormData) {
   const reservationId = String(formData.get('reservation_id') ?? '')
   const decision = String(formData.get('decision') ?? '')
   const notes = String(formData.get('notes') ?? '').trim()
-  if (!reservationId || !['APPROVED', 'REJECTED'].includes(decision)) throw new Error('Datos inválidos')
+  if (!reservationId || !['COMPLIES', 'DOES_NOT_COMPLY'].includes(decision)) throw new Error('Datos inválidos')
 
-  const approved = decision === 'APPROVED'
+  const approved = decision === 'COMPLIES'
+  const now = new Date().toISOString()
   const { error } = await supabase
     .from('salon_reservations')
     .update({
       good_standing_status: decision,
       good_standing_validated_by: userId,
-      good_standing_validated_at: new Date().toISOString(),
+      good_standing_validated_at: now,
       good_standing_notes: notes || null,
       status: approved ? 'PAYMENT_PENDING' : 'REJECTED',
-      ...(approved ? {} : { rejected_at: new Date().toISOString(), rejected_by: userId, rejection_reason: notes || 'No se encuentra a paz y salvo' }),
+      ...(approved ? {} : { rejected_at: now, rejected_by: userId, rejection_reason: notes || 'No se encuentra a paz y salvo' }),
     })
     .eq('id', reservationId)
     .in('status', ['REQUESTED', 'VALIDATING'])
@@ -34,6 +35,7 @@ async function validarPazSalvo(formData: FormData) {
   if (error) throw new Error(error.message)
   revalidatePath('/admin/paz-salvo')
   revalidatePath('/dashboard')
+  revalidatePath('/pagos')
 }
 
 export default async function PazSalvoPage() {
@@ -73,8 +75,8 @@ export default async function PazSalvoPage() {
             <label htmlFor={`notes-${r.id}`}>Observaciones de Administración</label>
             <textarea id={`notes-${r.id}`} name="notes" rows={3} style={{ width: '100%', marginTop: 8, marginBottom: 12 }} />
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-              <button type="submit" name="decision" value="APPROVED">Aprobar paz y salvo</button>
-              <button type="submit" name="decision" value="REJECTED">Rechazar solicitud</button>
+              <button type="submit" name="decision" value="COMPLIES">Aprobar paz y salvo</button>
+              <button type="submit" name="decision" value="DOES_NOT_COMPLY">Rechazar solicitud</button>
             </div>
           </form>
         </div>
