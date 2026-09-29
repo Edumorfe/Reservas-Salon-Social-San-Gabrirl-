@@ -47,8 +47,16 @@ export default async function DashboardPage() {
         <h2>Accesos</h2>
         <p><Link href="/reservas">Consultar disponibilidad del salón</Link></p>
         {role === 'RESIDENTE' && <><p><Link href="/pagos">Pago y comprobantes</Link></p><p className="muted">Las reservas y su seguimiento se muestran únicamente para tu apartamento.</p></>}
-        {role === 'ADMIN' && <p><Link href="/admin/paz-salvo">Validar paz y salvo</Link></p>}
-        {isStaff && <p className="muted">Administración y Portería visualizan la operación general según los permisos definidos en Supabase.</p>}
+        {role === 'ADMIN' && <>
+          <p><Link href="/admin/paz-salvo">Validar paz y salvo</Link></p>
+          <p><Link href="/admin/pagos">Revisar comprobantes de pago</Link></p>
+          <p><Link href="/admin/cierres">Liquidar depósito y cerrar reservas</Link></p>
+        </>}
+        {isStaff && <>
+          <p><Link href="/porteria/entregas">Entrega del salón</Link></p>
+          <p><Link href="/porteria/devoluciones">Devolución del salón</Link></p>
+          <p className="muted">Administración y Portería visualizan la operación general según los permisos definidos en Supabase.</p>
+        </>}
       </div>
     </main>
   )
