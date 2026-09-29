@@ -1,0 +1,13 @@
+export type UserRole = 'ADMIN' | 'PORTERIA' | 'RESIDENTE'
+export type ReservationStatus =
+  | 'REQUESTED'
+  | 'VALIDATING'
+  | 'PAYMENT_PENDING'
+  | 'PAYMENT_REVIEW'
+  | 'APPROVED'
+  | 'DELIVERED'
+  | 'RETURN_PENDING'
+  | 'RETURNED'
+  | 'CLOSED'
+  | 'REJECTED'
+  | 'CANCELLED'
